@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
  <channel>
    <title>Entity Framework Core on Kim Arpiainen</title>
-   <link>/tags/entity-framework-core/</link>
+   <link>https://kimisc.github.io/tags/entity-framework-core/</link>
    <description>Recent content in Entity Framework Core on Kim Arpiainen</description>
    <generator>Hugo -- gohugo.io</generator>
    <language>en-us</language>
    <lastBuildDate>Thu, 10 Oct 2019 08:46:30 +0200</lastBuildDate>
    
-       <atom:link href="/tags/entity-framework-core/index.xml" rel="self" type="application/rss+xml" />
+       <atom:link href="https://kimisc.github.io/tags/entity-framework-core/index.xml" rel="self" type="application/rss+xml" />
    
    
      <item>
        <title>Avoid Logic in Setters</title>
-       <link>/posts/avoid-logic-in-setters/</link>
+       <link>https://kimisc.github.io/posts/avoid-logic-in-setters/</link>
        <pubDate>Thu, 10 Oct 2019 08:46:30 +0200</pubDate>
        
-       <guid>/posts/avoid-logic-in-setters/</guid>
+       <guid>https://kimisc.github.io/posts/avoid-logic-in-setters/</guid>
        <description>&lt;p&gt;Its quite common in business to have requirements that when A happens, B needs to happen too. In the following imaginary example, the requirement is to increment the car owner count each time the owner changes. One way to implement it is to increment the counter in the setter. That way the developers don&#39;t have to remember to increment the counter each time owner is changed, updating the property is enough. In a bigger project this could be a domain event e.g. &lt;code&gt;CarOwnerChangedEvent&lt;/code&gt; and the handler would take care of this. To keep things simple, we just increment the counter.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-csharp&#34; data-lang=&#34;csharp&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Car&lt;/span&gt;
 {
