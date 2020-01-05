@@ -1,0 +1,87 @@
+
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+ <channel>
+   <title>Categories on Kim Arpiainen</title>
+   <link>/categories/</link>
+   <description>Recent content in Categories on Kim Arpiainen</description>
+   <generator>Hugo -- gohugo.io</generator>
+   <language>en-us</language>
+   <lastBuildDate>Thu, 10 Oct 2019 08:46:30 +0200</lastBuildDate>
+   
+       <atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
+   
+   
+     <item>
+       <title>Avoid Logic in Setters</title>
+       <link>/posts/avoid-logic-in-setters/</link>
+       <pubDate>Thu, 10 Oct 2019 08:46:30 +0200</pubDate>
+       
+       <guid>/posts/avoid-logic-in-setters/</guid>
+       <description>&lt;p&gt;Its quite common in business to have requirements that when A happens, B needs to happen too. In the following imaginary example, the requirement is to increment the car owner count each time the owner changes. One way to implement it is to increment the counter in the setter. That way the developers don&#39;t have to remember to increment the counter each time owner is changed, updating the property is enough. In a bigger project this could be a domain event e.g. &lt;code&gt;CarOwnerChangedEvent&lt;/code&gt; and the handler would take care of this. To keep things simple, we just increment the counter.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-csharp&#34; data-lang=&#34;csharp&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Car&lt;/span&gt;
+{
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;private&lt;/span&gt; Owner _owner;
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; Id { &lt;span style=&#34;color:#66d9ef&#34;&gt;get&lt;/span&gt;; &lt;span style=&#34;color:#66d9ef&#34;&gt;set&lt;/span&gt;; }
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; OwnerCount {&lt;span style=&#34;color:#66d9ef&#34;&gt;get&lt;/span&gt;; &lt;span style=&#34;color:#66d9ef&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;set&lt;/span&gt;;}
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; Owner Owner {
+        &lt;span style=&#34;color:#66d9ef&#34;&gt;get&lt;/span&gt; {
+            &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; _owner;
+        }
+        &lt;span style=&#34;color:#66d9ef&#34;&gt;set&lt;/span&gt; {
+            OwnerCount++;
+            _owner = &lt;span style=&#34;color:#66d9ef&#34;&gt;value&lt;/span&gt;;
+        }
+    }
+}
+
+&lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Client&lt;/span&gt; {
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; CarSoldToNewOwner(&lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; carId, Owner newOwner)
+    {
+        &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; car = GetCarById(carId);
+        car.Owner = newOwner;
+    }
+
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; Car GetCarById(&lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; id)
+    {
+        &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; _context.Cars
+            .Include(x =&amp;gt; x.Owner)
+            .FirstOrDefault(x =&amp;gt; x.Id == id);
+    }
+}
+
+&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;DemoContext&lt;/span&gt; : DbContext
+{
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; DemoContext(DbContextOptions&amp;lt;DemoContext&amp;gt; options) : &lt;span style=&#34;color:#66d9ef&#34;&gt;base&lt;/span&gt;(options){ }
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; DbSet&amp;lt;Car&amp;gt; Cars { &lt;span style=&#34;color:#66d9ef&#34;&gt;get&lt;/span&gt;; &lt;span style=&#34;color:#66d9ef&#34;&gt;set&lt;/span&gt;; }
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; DbSet&amp;lt;Owner&amp;gt; Owners { &lt;span style=&#34;color:#66d9ef&#34;&gt;get&lt;/span&gt;; &lt;span style=&#34;color:#66d9ef&#34;&gt;set&lt;/span&gt;; }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;And of course we&#39;ve included a test case to prove that it works correctly.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-csharp&#34; data-lang=&#34;csharp&#34;&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;[Fact]&lt;/span&gt;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; Car_OnOwnerChange_IncrementsOwnerCount()
+{
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; car = &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; Car();
+    car.Owner = &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; Owner(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;owner&amp;#34;&lt;/span&gt;);
+    Assert.Equal(&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;, car.OwnerCount);
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h2 id=&#34;updating-the-car-object&#34;&gt;Updating the Car object&lt;/h2&gt;
+&lt;p&gt;Entity Framework (EF) Core is used in the example to handle persistence for us. Now the day comes that an old car that was already in the system is sold to a new owner. &lt;code&gt;CarSoldToNewOwner&lt;/code&gt; is called and car data is fetched from the database, EF creates a &lt;code&gt;Car&lt;/code&gt; object for us and we change the owner. The &lt;code&gt;GetCarById&lt;/code&gt; is a simple read-only query, it gets the car with the correct Id and loads the Owner data along with it.&lt;/p&gt;
+&lt;p&gt;The problems arise when the saved entity is fetched from the database by our ORM. Entity framework needs to fetch the data from the database and construct objects for us to handle. The problem with setters is that ORMs &lt;strong&gt;can&lt;/strong&gt; use them when creating objects. Due to wrongly configured backing field in the &lt;code&gt;Car&lt;/code&gt; class (wrong being no configuration at all), EF will call the Owner setter in the &lt;code&gt;Car&lt;/code&gt; class when retrieving the object in &lt;code&gt;GetCarById&lt;/code&gt;. Thus the &lt;code&gt;CarSoldToNewOwner&lt;/code&gt; will increment the owner counter by two instead of one, once after the read and second time by our business logic. This is definitely not obvious behavior from reading the code and thus a hard bug to track. &lt;code&gt;GetCarById&lt;/code&gt; is just a simple read-only query. Although the convention for a backing field is followed, navigation properties require &lt;strong&gt;additional&lt;/strong&gt; configuration.&lt;/p&gt;
+&lt;h2 id=&#34;fixing-the-issue&#34;&gt;Fixing the issue&lt;/h2&gt;
+&lt;p&gt;Personally I would fix this issue by moving the logic away from the setter, maybe even having the setter as private and have a &lt;code&gt;ChangeOwner(newOwner)&lt;/code&gt; method in the &lt;code&gt;Car&lt;/code&gt; class that increments the counter. The API becomes more clear and I&#39;m expecting additional processing as I&#39;m calling a method instead of a property setter. Also if we would like to include some validation to the owner change, like a null check, it would not make much sense if the setter throws an &lt;code&gt;ArgumentNullException&lt;/code&gt;. In my opinion a separate method follows the &lt;a href=&#34;https://en.wikipedia.org/wiki/Principle_of_least_astonishment&#34;&gt;Principle of least astonishment&lt;/a&gt; better than the property setter.&lt;/p&gt;
+&lt;p&gt;There are definitely cases where having the increment in the setter is the best option. Could be for example a legacy system with dozens of references to &lt;code&gt;car.Owner = newOwner&lt;/code&gt; and we need to get the business requirement filled. Or bunch of other reasons. To get the example working as expected in EF core, following configuration is required.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-csharp&#34; data-lang=&#34;csharp&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;protected&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;override&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; OnModelCreating(ModelBuilder modelBuilder)
+{
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; navigation = modelBuilder.Entity&amp;lt;Car&amp;gt;()
+        .Metadata.FindNavigation(nameof(Car.Owner));
+
+    navigation.SetPropertyAccessMode(PropertyAccessMode.Field);
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;With this configuration, EFs object creation does not touch the setter anymore and the owner count is incremented only in our code. It uses the provided backing field &lt;code&gt;_owner&lt;/code&gt; instead of the &lt;code&gt;Owner&lt;/code&gt; property.&lt;/p&gt;
+&lt;h2 id=&#34;summary&#34;&gt;Summary&lt;/h2&gt;
+&lt;p&gt;Although I only tested this behavior on EF core, my &lt;em&gt;guess&lt;/em&gt; is that the problem with setters applies to other ORMs as well, one way or another. Personally I prefer the first fix, where the logic is encapsulated to a method. It is more clear for the API consumer, does not require any additional configuration for the entities and the team does not have to worry about the weird cases where the problem surfaces.&lt;/p&gt;
+&lt;p&gt;If you need to take the second route with the additional configuration, double check that you have integration tests that include EF in the mix. You can find one &lt;a href=&#34;https://github.com/kimisc/SetterDemo/blob/ebc0c015131962bbff17ce92f13a5f72713d1736/SetterDemoTests/CarTests.cs#L19&#34;&gt;example here&lt;/a&gt;. Obviously its always good to have the integration tests, even when going with the recommended solution.&lt;/p&gt;
+</description>
+     </item>
+   
+ </channel>
+</rss>
