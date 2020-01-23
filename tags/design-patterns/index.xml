@@ -1,16 +1,16 @@
 
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
  <channel>
-   <title>Programming on Kim Arpiainen</title>
-   <link>https://kimisc.github.io/categories/programming/</link>
-   <description>Recent content in Programming on Kim Arpiainen</description>
+   <title>design patterns on Kim Arpiainen</title>
+   <link>https://kimisc.github.io/tags/design-patterns/</link>
+   <description>Recent content in design patterns on Kim Arpiainen</description>
    <generator>Hugo -- gohugo.io</generator>
    <language>en-us</language>
    <managingEditor>kimarp15@gmail.com (Kim Arpiainen)</managingEditor>
    <webMaster>kimarp15@gmail.com (Kim Arpiainen)</webMaster>
    <lastBuildDate>Thu, 23 Jan 2020 08:46:30 +0200</lastBuildDate>
    
-       <atom:link href="https://kimisc.github.io/categories/programming/index.xml" rel="self" type="application/rss+xml" />
+       <atom:link href="https://kimisc.github.io/tags/design-patterns/index.xml" rel="self" type="application/rss+xml" />
    
    
      <item>

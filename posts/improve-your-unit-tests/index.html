@@ -1,0 +1,180 @@
+<!doctype html>
+
+<html lang="en-us">
+
+<head>
+  <title>Kim Arpiainen</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="The HTML5 Herald" />
+  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.62.2" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
+<script src="/js/font-awesome/all.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda" />
+<link rel="stylesheet" type="text/css" href="/css/styles.css" />
+<link rel="stylesheet" type="text/css" href="/css/prism.css" /></head>
+
+<body>
+  <div id="container">
+    <header>
+      <h1>
+                <a href="/">Kim Arpiainen</a>
+            </h1>
+
+      <ul id="social-media">
+        
+        
+         
+        <li><a href="https://www.linkedin.com/in/kim-arpiainen"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+         
+        <li><a href="https://github.com/kimisc"><i class="fab fa-github fa-lg" aria-hidden="true"></i></a></li>
+         
+        <li><a href="mailto:kimarp15@gmail.com"><i class="fas fa-at fa-lg" aria-hidden="true"></i></a></li>
+           
+      </ul>
+      
+    </header>
+
+    
+<nav>
+    <ul>
+        
+    </ul>
+</nav>
+
+    <main>
+
+
+
+
+<article>
+
+    <h1>Improve Unit Test Maintainability with Fluent Builder</h1>
+
+    
+        <aside>
+    <ul>
+        <li>
+            <time class="post-date" datetime="2020-01-10T08:46:30&#43;02:00">Jan 10, 2020</time>
+        </li>
+        
+        <li>
+            Categories:
+            <em>
+                
+                    
+                    <a href="/categories/programming">Programming</a>
+                
+            </em>
+        </li>
+        
+
+        
+        <li>
+            <em>
+                
+                    
+                    <a href="/tags/unit-testing">#Unit testing</a>
+                
+            </em>
+        </li>
+        
+
+        <li>4 minutes read</li>
+    </ul>
+</aside>
+
+    
+
+    <p>In case you are not familiar with the AAA pattern (Arrange, Act, Assert), <a href="https://xp123.com/articles/3a-arrange-act-assert/">you might find this useful</a></p>
+<p>The Fluent Builder pattern is something that I've been aware for a while but not really used that much. I used to setup the arrange phase within each test using regular object creation. Reason for this mostly was that I didn't see much use for the fluent builder. First of all it would take some development time to setup and maintain while I can just use the constructor and some setters to achieve the same thing inside the test method. Using Fluent Builder seemed like an overkill.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#a6e22e">
+</span><span style="color:#a6e22e">[Fact]</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> Customer_WithValidData_ThenSomething() {
+    <span style="color:#66d9ef">var</span> customer = <span style="color:#66d9ef">new</span> Customer();
+    customer.Name = <span style="color:#e6db74">&#34;Mark&#34;</span>;
+    customer.Age = <span style="color:#ae81ff">2</span><span style="color:#ae81ff">5</span>;
+    customer.Email = <span style="color:#e6db74">&#34;something@something.com&#34;</span>;
+
+    <span style="color:#75715e">// rest of the test
+</span><span style="color:#75715e"></span>}
+</code></pre></div><p>This is quite basic setup phase. Lets say that we have 15 tests for the customer using this setup. We can also now assume that Name, Age and Email are all required properties for a customer in this case. It makes sense to refactor the <code>Customer</code> class constructor to have those three required parameters. Now there are 15 compile errors in our <code>Customer</code> tests. To fix this duplication, we can extract a method for <code>CreateValidCustomer</code> and use that going forward.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#66d9ef">public</span> Customer CreateValidCustomer() {
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> Customer(<span style="color:#e6db74">&#34;Mark&#34;</span>, <span style="color:#ae81ff">2</span><span style="color:#ae81ff">5</span>, <span style="color:#e6db74">&#34;something@something.com&#34;</span>);
+}
+
+</code></pre></div><p>I'm guessing here but I think that in most cases the first step is skipped with the copy pasting and some sort of <code>CreateTestData</code> method is in place to reduce duplication. This is usually referred as <a href="https://martinfowler.com/bliki/ObjectMother.html">&ldquo;Object Mother&rdquo;</a>.</p>
+<p>For the most part I settled for the Object Mother and its completely fine if it suffices. For thorough testing you will need some invalid objects too. What easily happens with Object Mothers is that you start to have multiple creation methods or parameterized methods to create specific objects and its starting to defeat the purpose. E.g. <code>CreateValidCustomer</code>, <code>CreateCustomerWithAge</code> or <code>CreateCustomer(string name = &quot;Mark&quot;, int age = 25)</code> etc.</p>
+<p>This is where the Fluent Builder can help. You can easily build the state for the test object.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp">
+<span style="color:#75715e">// This is test specific code which lies in the test project, not referenced in production code
+</span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CustomerBuilder</span>() {
+
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">string</span> _name = <span style="color:#e6db74">&#34;Mark&#34;</span>; <span style="color:#75715e">// you can have defaults here
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> _age;
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">string</span> _email;
+
+    <span style="color:#66d9ef">public</span> CustomerBuilder() {
+        _age = <span style="color:#ae81ff">2</span><span style="color:#ae81ff">5</span>; <span style="color:#75715e">// or if you prefer to explicitly set the defaults in the constructor
+</span><span style="color:#75715e"></span>        _email = <span style="color:#e6db74">&#34;something@something.com&#34;</span>;
+    }
+
+    <span style="color:#66d9ef">public</span> CustomerBuilder WithName(<span style="color:#66d9ef">string</span> name) {
+        _name = name;
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span>;
+    }
+
+    <span style="color:#66d9ef">public</span> CustomerBuilder WithAge(<span style="color:#66d9ef">int</span> age) {
+        _age = age;
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span>;
+    }
+
+    <span style="color:#66d9ef">public</span> Customer Build() {
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> Customer(_name, _age, _email);
+    }
+}
+
+</code></pre></div><p>With the Fluent Builder setup we can now easily create different types of customers.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#a6e22e">[Fact]</span>
+<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> CustomerMethod_State_Expectation() {
+    <span style="color:#66d9ef">var</span> tooYoungCustomer = <span style="color:#66d9ef">new</span> CustomerBuilder()
+        .WithAge(<span style="color:#ae81ff">1</span><span style="color:#ae81ff">0</span>)
+        .Build();
+}
+
+</code></pre></div><p>Now we have a good method for creating different variations from the customer for our testing needs. In most cases we still need the valid customer though. For that you can define some default values and call <code>new CustomerBuilder().Build()</code>. In case you have multiple tests where you need the same configuration for a customer, e.g. <code>GenericInvalidCustomer</code> or something similar, you can combine the Object Mother pattern and fluent builder pattern by adding that method in the builder class. This will reduce the duplicate code from creating the same object with the builder over and over again.</p>
+<h2 id="summary">Summary</h2>
+<p>For a long time I saw the Fluent Builder pattern as an overkill. I thought that it takes too much time to implement and maintain. I have noticed that this is completely false. You can add the builder methods when you need them. The methods themselves are usually just few lines of boilerplate code so it takes only few seconds to add them. Some properties don't need to be set in the builder at all. Although I do not rush to create builder for each new class, I have much smaller threshold for adding one. I have to make the decision if the target class is worth the boilerplate code.</p>
+<!-- raw HTML omitted -->
+<!-- raw HTML omitted -->
+
+
+</article>
+
+
+<section class="post-nav">
+    <ul>
+        
+        <li>
+            <a href="https://kimisc.github.io/posts/avoid-logic-in-setters/"><i class="fa fa-chevron-circle-left"></i> Avoid Logic in Setters</a>
+        </li>
+        
+        
+    </ul>
+</section>
+    
+
+
+
+
+
+</main>
+<footer>
+
+</footer>
+</div>
+<script src="/js/prism.js"></script>
+</body>
+
+</html>
+

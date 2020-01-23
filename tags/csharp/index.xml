@@ -6,16 +6,87 @@
    <description>Recent content in csharp on Kim Arpiainen</description>
    <generator>Hugo -- gohugo.io</generator>
    <language>en-us</language>
+   <managingEditor>kimarp15@gmail.com (Kim Arpiainen)</managingEditor>
+   <webMaster>kimarp15@gmail.com (Kim Arpiainen)</webMaster>
    <lastBuildDate>Thu, 10 Oct 2019 08:46:30 +0200</lastBuildDate>
    
        <atom:link href="https://kimisc.github.io/tags/csharp/index.xml" rel="self" type="application/rss+xml" />
    
    
      <item>
+       <title>Simplifying Test Setup with Fluent Builder</title>
+       <link>https://kimisc.github.io/posts/simplify-test-setup-fluent-builder/</link>
+       <pubDate>Thu, 23 Jan 2020 08:46:30 +0200</pubDate>
+       <author>kimarp15@gmail.com (Kim Arpiainen)</author>
+       <guid>https://kimisc.github.io/posts/simplify-test-setup-fluent-builder/</guid>
+       <description>&lt;p&gt;One of the many difficult things in software development is unit testing. Tests should be simple enough so that its easy to see and verify what is being tested. They should also be adaptive enough not to become too big of a burden to maintain alongside the production code. Not to mention actually testing something meaningful. This post focuses on the first phase of unit testing, the Arrange-phase. In case you are not familiar with AAA (&amp;ldquo;Arrange, Act, Assert&amp;rdquo; pattern), &lt;a href=&#34;http://wiki.c2.com/?ArrangeActAssert&#34;&gt;you can read more here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;One way to setup test objects is to use setters or object initializer syntax to populate the values in each test. Lets say that we have 10 tests for the customer written in the following way:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-csharp&#34; data-lang=&#34;csharp&#34;&gt;&lt;span style=&#34;color:#a6e22e&#34;&gt;[Fact]&lt;/span&gt;
+&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;void&lt;/span&gt; Customer_WithValidData_ThenSomething() {
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; customer = &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; Customer();
+    customer.Name = &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Jon&amp;#34;&lt;/span&gt;;
+    customer.Age = &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt;;
+    customer.Email = &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;something@something.com&amp;#34;&lt;/span&gt;;
+    &lt;span style=&#34;color:#75715e&#34;&gt;// rest of the test
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is quite basic setup phase. We can assume that Name, Age and Email are all required properties for a valid customer. It makes sense to refactor the &lt;code&gt;Customer&lt;/code&gt; class constructor to have those three parameters so that its impossible to create customer without these values.&lt;/p&gt;
+&lt;p&gt;After the constructor change, there are 10 compile errors in our &lt;code&gt;Customer&lt;/code&gt; tests. At the same time the setters could be made private, so that raises the compilation error count even more. To fix this problem in our tests, we can extract a method for &lt;code&gt;CreateValidCustomer&lt;/code&gt; and use that for object creation.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-csharp&#34; data-lang=&#34;csharp&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; Customer CreateValidCustomer() {
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; Customer(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Jon&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;something@something.com&amp;#34;&lt;/span&gt;);
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;I guess that in most cases the pitfall from first example is avoided and some sort of &lt;code&gt;CreateTestData&lt;/code&gt; method is in place from the beginning. It&#39;s a lot better option as we control the object creation in a single place. That means that if the classes API changes, we only need to update one place to reflect those changes. This way we can avoid breaking the tests in multiple places.&lt;/p&gt;
+&lt;p&gt;However, for thorough testing you will need different variations of objects. For that you probably have a class that contains a few methods for creating test objects. Examples could be &lt;code&gt;CreateValidCustomer&lt;/code&gt; and &lt;code&gt;CreateInvalidCustomer&lt;/code&gt;. This is usually referred as the &lt;a href=&#34;https://martinfowler.com/bliki/ObjectMother.html&#34;&gt;&amp;ldquo;Object Mother&amp;rdquo;&lt;/a&gt;. The drawback of the Object Mother is that its hard to handle the different permutations required for our tests.&lt;/p&gt;
+&lt;p&gt;This is where the Fluent Builder can help. You can easily define the target state for the object.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-csharp&#34; data-lang=&#34;csharp&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// This is test specific code which lies in the test project
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;// not referenced nor part of production code
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;CustomerBuilder&lt;/span&gt; {
+
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt; _name = &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Jon&amp;#34;&lt;/span&gt;; &lt;span style=&#34;color:#75715e&#34;&gt;// you can have defaults here
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; _age;
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;private&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt; _email;
+
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; CustomerBuilder() {
+        &lt;span style=&#34;color:#75715e&#34;&gt;// or if you prefer to explicitly set the defaults in the constructor
+&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;&lt;/span&gt;        _age = &lt;span style=&#34;color:#ae81ff&#34;&gt;2&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;5&lt;/span&gt;;
+        _email = &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;something@something.com&amp;#34;&lt;/span&gt;;
+    }
+
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; CustomerBuilder WithName(&lt;span style=&#34;color:#66d9ef&#34;&gt;string&lt;/span&gt; name) {
+        _name = name;
+        &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;this&lt;/span&gt;;
+    }
+
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; CustomerBuilder WithAge(&lt;span style=&#34;color:#66d9ef&#34;&gt;int&lt;/span&gt; age) {
+        _age = age;
+        &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;this&lt;/span&gt;;
+    }
+
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; Customer Build() {
+        &lt;span style=&#34;color:#66d9ef&#34;&gt;return&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; Customer(_name, _age, _email);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;With the Fluent Builder setup we can now easily create different types of customers.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-csharp&#34; data-lang=&#34;csharp&#34;&gt;    &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; customerWithInvalidName = &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; CustomerBuilder()
+        .WithName(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;-&amp;#34;&lt;/span&gt;)
+        .Build();
+
+    &lt;span style=&#34;color:#66d9ef&#34;&gt;var&lt;/span&gt; tooYoungCustomerWithValidName = &lt;span style=&#34;color:#66d9ef&#34;&gt;new&lt;/span&gt; CustomerBuilder()
+        .WithName(&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Jon&amp;#34;&lt;/span&gt;)
+        .WithAge(&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;)
+        .Build();
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Now we have a way for creating different variations from the &lt;code&gt;Customer&lt;/code&gt; class for our testing needs. The builder will also make the object creation clear and declarative. In most cases we still need the default valid customer. For that you can define some sensible default values and call &lt;code&gt;new CustomerBuilder().Build()&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;One could argue that tests with unique test data needs are better to write inline within the test using constructor, and the common cases are covered with the Object Mother. That leads us straight back to the first example. If we would add e.g. &lt;code&gt;Address&lt;/code&gt; property, we could hopefully fix the old tests with a default value, thus no changes are required in the client code.&lt;/p&gt;
+&lt;p&gt;In case you have multiple tests where you need the same configuration for a customer, e.g. &lt;code&gt;GenericInvalidCustomer&lt;/code&gt;, you can combine the creation method and Fluent Builder pattern by adding the method in the builder class. For really complex object graphs you could even combine other classes builders/object mothers to build up the customer. E.g. &lt;code&gt;customer.Address = AddressMother.ValidAddress()&lt;/code&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;summary&#34;&gt;Summary&lt;/h2&gt;
+&lt;p&gt;The Fluent Builder is a great pattern for unit testing. Even though it might seem like too much hassle, it is quick and easy to implement. When you need to change a property, just add a few lines of boilerplate code. That being said, I definitely do not recommend writing a Fluent Builder for every class in the system. I would start with a basic creation method and adjust as necessary. Whatever is the easiest to maintain.&lt;/p&gt;
+</description>
+     </item>
+   
+     <item>
        <title>Avoid Logic in Setters</title>
        <link>https://kimisc.github.io/posts/avoid-logic-in-setters/</link>
        <pubDate>Thu, 10 Oct 2019 08:46:30 +0200</pubDate>
-       
+       <author>kimarp15@gmail.com (Kim Arpiainen)</author>
        <guid>https://kimisc.github.io/posts/avoid-logic-in-setters/</guid>
        <description>&lt;p&gt;Its quite common in business to have requirements that when A happens, B needs to happen too. In the following imaginary example, the requirement is to increment the car owner count each time the owner changes. One way to implement it is to increment the counter in the setter. That way the developers don&#39;t have to remember to increment the counter each time owner is changed, updating the property is enough. In a bigger project this could be a domain event e.g. &lt;code&gt;CarOwnerChangedEvent&lt;/code&gt; and the handler would take care of this. To keep things simple, we just increment the counter.&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-csharp&#34; data-lang=&#34;csharp&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;public&lt;/span&gt; &lt;span style=&#34;color:#66d9ef&#34;&gt;class&lt;/span&gt; &lt;span style=&#34;color:#a6e22e&#34;&gt;Car&lt;/span&gt;
