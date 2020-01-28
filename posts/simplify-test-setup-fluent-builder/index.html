@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="The HTML5 Herald" />
-  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.62.2" />
+  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.63.1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
 <script src="/js/font-awesome/all.min.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda" />
@@ -89,7 +89,7 @@
 
     
 
-    <p>One of the many difficult things in software development is unit testing. Tests should be simple enough so that its easy to see and verify what is being tested. They should also be adaptive enough not to become too big of a burden to maintain alongside the production code. Not to mention actually testing something meaningful. This post focuses on the first phase of unit testing, the Arrange-phase. In case you are not familiar with AAA (&ldquo;Arrange, Act, Assert&rdquo; pattern), <a href="http://wiki.c2.com/?ArrangeActAssert">you can read more here</a>.</p>
+    <p>One of the many difficult things in software development is unit testing. Tests should be simple enough so that it&rsquo;s easy to see and verify what is being tested. They should also be adaptive enough not to become too big of a burden to maintain alongside the production code. Not to mention actually testing something meaningful. This post focuses on the first phase of unit testing, the Arrange-phase. In case you are not familiar with AAA (&ldquo;Arrange, Act, Assert&rdquo; pattern), <a href="http://wiki.c2.com/?ArrangeActAssert">you can read more here</a>.</p>
 <p>One way to setup test objects is to use setters or object initializer syntax to populate the values in each test. Lets say that we have 10 tests for the customer written in the following way:</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#a6e22e">[Fact]</span>
 <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> Customer_WithValidData_ThenSomething() {
@@ -104,8 +104,8 @@
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#66d9ef">public</span> Customer CreateValidCustomer() {
     <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> Customer(<span style="color:#e6db74">&#34;Jon&#34;</span>, <span style="color:#ae81ff">2</span><span style="color:#ae81ff">5</span>, <span style="color:#e6db74">&#34;something@something.com&#34;</span>);
 }
-</code></pre></div><p>I guess that in most cases the pitfall from first example is avoided and some sort of <code>CreateTestData</code> method is in place from the beginning. It's a lot better option as we control the object creation in a single place. That means that if the classes API changes, we only need to update one place to reflect those changes. This way we can avoid breaking the tests in multiple places.</p>
-<p>However, for thorough testing you will need different variations of objects. For that you probably have a class that contains a few methods for creating test objects. Examples could be <code>CreateValidCustomer</code> and <code>CreateInvalidCustomer</code>. This is usually referred as the <a href="https://martinfowler.com/bliki/ObjectMother.html">&ldquo;Object Mother&rdquo;</a>. The drawback of the Object Mother is that its hard to handle the different permutations required for our tests.</p>
+</code></pre></div><p>I guess that in most cases the pitfall from first example is avoided and some sort of <code>CreateTestData</code> method is in place from the beginning. It&rsquo;s a lot better option as we control the object creation in a single place. That means that if the class API changes, we only need to update one place to reflect those changes. This way we can avoid breaking the tests in multiple places.</p>
+<p>However, for thorough testing you will need different variations of objects. For that you probably have a class that contains a few methods for creating test objects. Examples could be <code>CreateValidCustomer</code> and <code>CreateInvalidCustomer</code>. This is usually referred as the <a href="https://martinfowler.com/bliki/ObjectMother.html">&ldquo;Object Mother&rdquo;</a>. The drawback of the Object Mother is that it&rsquo;s hard to handle the different permutations required for our tests.</p>
 <p>This is where the Fluent Builder can help. You can easily define the target state for the object.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#75715e">// This is test specific code which lies in the test project
 </span><span style="color:#75715e"></span><span style="color:#75715e">// not referenced nor part of production code

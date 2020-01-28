@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="The HTML5 Herald" />
-  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.62.2" />
+  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.63.1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
 <script src="/js/font-awesome/all.min.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda" />
@@ -95,7 +95,7 @@
 
     
 
-    <p>Its quite common in business to have requirements that when A happens, B needs to happen too. In the following imaginary example, the requirement is to increment the car owner count each time the owner changes. One way to implement it is to increment the counter in the setter. That way the developers don't have to remember to increment the counter each time owner is changed, updating the property is enough. In a bigger project this could be a domain event e.g. <code>CarOwnerChangedEvent</code> and the handler would take care of this. To keep things simple, we just increment the counter.</p>
+    <p>Its quite common in business to have requirements that when A happens, B needs to happen too. In the following imaginary example, the requirement is to increment the car owner count each time the owner changes. One way to implement it is to increment the counter in the setter. That way the developers don&rsquo;t have to remember to increment the counter each time owner is changed, updating the property is enough. In a bigger project this could be a domain event e.g. <code>CarOwnerChangedEvent</code> and the handler would take care of this. To keep things simple, we just increment the counter.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Car</span>
 {
     <span style="color:#66d9ef">private</span> Owner _owner;
@@ -133,7 +133,7 @@
     <span style="color:#66d9ef">public</span> DbSet&lt;Car&gt; Cars { <span style="color:#66d9ef">get</span>; <span style="color:#66d9ef">set</span>; }
     <span style="color:#66d9ef">public</span> DbSet&lt;Owner&gt; Owners { <span style="color:#66d9ef">get</span>; <span style="color:#66d9ef">set</span>; }
 }
-</code></pre></div><p>And of course we've included a test case to prove that it works correctly.</p>
+</code></pre></div><p>And of course we&rsquo;ve included a test case to prove that it works correctly.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#a6e22e">[Fact]</span>
 <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> Car_OnOwnerChange_IncrementsOwnerCount()
 {
@@ -145,7 +145,7 @@
 <p>Entity Framework (EF) Core is used in the example to handle persistence for us. Now the day comes that an old car that was already in the system is sold to a new owner. <code>CarSoldToNewOwner</code> is called and car data is fetched from the database, EF creates a <code>Car</code> object for us and we change the owner. The <code>GetCarById</code> is a simple read-only query, it gets the car with the correct Id and loads the Owner data along with it.</p>
 <p>The problems arise when the saved entity is fetched from the database by our ORM. Entity framework needs to fetch the data from the database and construct objects for us to handle. The problem with setters is that ORMs <strong>can</strong> use them when creating objects. Due to wrongly configured backing field in the <code>Car</code> class (wrong being no configuration at all), EF will call the Owner setter in the <code>Car</code> class when retrieving the object in <code>GetCarById</code>. Thus the <code>CarSoldToNewOwner</code> will increment the owner counter by two instead of one, once after the read and second time by our business logic. This is definitely not obvious behavior from reading the code and thus a hard bug to track. <code>GetCarById</code> is just a simple read-only query. Although the convention for a backing field is followed, navigation properties require <strong>additional</strong> configuration.</p>
 <h2 id="fixing-the-issue">Fixing the issue</h2>
-<p>Personally I would fix this issue by moving the logic away from the setter, maybe even having the setter as private and have a <code>ChangeOwner(newOwner)</code> method in the <code>Car</code> class that increments the counter. The API becomes more clear and I'm expecting additional processing as I'm calling a method instead of a property setter. Also if we would like to include some validation to the owner change, like a null check, it would not make much sense if the setter throws an <code>ArgumentNullException</code>. In my opinion a separate method follows the <a href="https://en.wikipedia.org/wiki/Principle_of_least_astonishment">Principle of least astonishment</a> better than the property setter.</p>
+<p>Personally I would fix this issue by moving the logic away from the setter, maybe even having the setter as private and have a <code>ChangeOwner(newOwner)</code> method in the <code>Car</code> class that increments the counter. The API becomes more clear and I&rsquo;m expecting additional processing as I&rsquo;m calling a method instead of a property setter. Also if we would like to include some validation to the owner change, like a null check, it would not make much sense if the setter throws an <code>ArgumentNullException</code>. In my opinion a separate method follows the <a href="https://en.wikipedia.org/wiki/Principle_of_least_astonishment">Principle of least astonishment</a> better than the property setter.</p>
 <p>There are definitely cases where having the increment in the setter is the best option. Could be for example a legacy system with dozens of references to <code>car.Owner = newOwner</code> and we need to get the business requirement filled. Or bunch of other reasons. To get the example working as expected in EF core, following configuration is required.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">override</span> <span style="color:#66d9ef">void</span> OnModelCreating(ModelBuilder modelBuilder)
 {
