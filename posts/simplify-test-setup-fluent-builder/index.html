@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="The HTML5 Herald" />
-  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.63.1" />
+  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.79.1" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
 <script src="/js/font-awesome/all.min.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda" />
@@ -95,20 +95,20 @@
 <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> Customer_WithValidData_ThenSomething() {
     <span style="color:#66d9ef">var</span> customer = <span style="color:#66d9ef">new</span> Customer();
     customer.Name = <span style="color:#e6db74">&#34;Jon&#34;</span>;
-    customer.Age = <span style="color:#ae81ff">2</span><span style="color:#ae81ff">5</span>;
+    customer.Age = <span style="color:#ae81ff">25</span>;
     customer.Email = <span style="color:#e6db74">&#34;something@something.com&#34;</span>;
     <span style="color:#75715e">// rest of the test
 </span><span style="color:#75715e"></span>}
 </code></pre></div><p>This is quite basic setup phase. We can assume that Name, Age and Email are all required properties for a valid customer. It makes sense to refactor the <code>Customer</code> class constructor to have those three parameters so that its impossible to create customer without these values.</p>
 <p>After the constructor change, there are 10 compile errors in our <code>Customer</code> tests. At the same time the setters could be made private, so that raises the compilation error count even more. To fix this problem in our tests, we can extract a method for <code>CreateValidCustomer</code> and use that for object creation.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#66d9ef">public</span> Customer CreateValidCustomer() {
-    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> Customer(<span style="color:#e6db74">&#34;Jon&#34;</span>, <span style="color:#ae81ff">2</span><span style="color:#ae81ff">5</span>, <span style="color:#e6db74">&#34;something@something.com&#34;</span>);
+    <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> Customer(<span style="color:#e6db74">&#34;Jon&#34;</span>, <span style="color:#ae81ff">25</span>, <span style="color:#e6db74">&#34;something@something.com&#34;</span>);
 }
 </code></pre></div><p>I guess that in most cases the pitfall from first example is avoided and some sort of <code>CreateTestData</code> method is in place from the beginning. It&rsquo;s a lot better option as we control the object creation in a single place. That means that if the class API changes, we only need to update one place to reflect those changes. This way we can avoid breaking the tests in multiple places.</p>
 <p>However, for thorough testing you will need different variations of objects. For that you probably have a class that contains a few methods for creating test objects. Examples could be <code>CreateValidCustomer</code> and <code>CreateInvalidCustomer</code>. This is usually referred as the <a href="https://martinfowler.com/bliki/ObjectMother.html">&ldquo;Object Mother&rdquo;</a>. The drawback of the Object Mother is that it&rsquo;s hard to handle the different permutations required for our tests.</p>
 <p>This is where the Fluent Builder can help. You can easily define the target state for the object.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#75715e">// This is test specific code which lies in the test project
-</span><span style="color:#75715e"></span><span style="color:#75715e">// not referenced nor part of production code
+</span><span style="color:#75715e">// not referenced nor part of production code
 </span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CustomerBuilder</span> {
 
     <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">string</span> _name = <span style="color:#e6db74">&#34;Jon&#34;</span>; <span style="color:#75715e">// you can have defaults here
@@ -117,7 +117,7 @@
 
     <span style="color:#66d9ef">public</span> CustomerBuilder() {
         <span style="color:#75715e">// or if you prefer to explicitly set the defaults in the constructor
-</span><span style="color:#75715e"></span>        _age = <span style="color:#ae81ff">2</span><span style="color:#ae81ff">5</span>;
+</span><span style="color:#75715e"></span>        _age = <span style="color:#ae81ff">25</span>;
         _email = <span style="color:#e6db74">&#34;something@something.com&#34;</span>;
     }
 
