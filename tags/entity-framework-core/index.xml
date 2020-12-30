@@ -14,6 +14,78 @@
    
    
      <item>
+       <title>Development environment in a container with Remote Containers</title>
+       <link>https://kimisc.github.io/posts/dev-containers-with-docker/</link>
+       <pubDate>Wed, 30 Dec 2020 08:46:30 +0200</pubDate>
+       <author>kimarp15@gmail.com (Kim Arpiainen)</author>
+       <guid>https://kimisc.github.io/posts/dev-containers-with-docker/</guid>
+       <description>&lt;p&gt;Multiple projects with different development environments are painful. Or the same project developed on two separate machines. Install this and that to get it running. Now the project starts but something is still off. Fix that. Now help your team to get it running too. If you are smart you document your steps. After a while a new developer joins your team, or maybe your own computer breaks down. You have to use precious time to get yet-another-development-environment up and running. Maybe there are things that you forgot to document.&lt;/p&gt;
+&lt;p&gt;What if we could share our development environment with the other team members to reduce the &amp;ldquo;works on my machine&amp;rdquo; -effect and also cut costs by saving time on onboarding and maintenance?&lt;/p&gt;
+&lt;h3 id=&#34;short-introduction-to-containers&#34;&gt;Short introduction to containers&lt;/h3&gt;
+&lt;p&gt;Containers allow developers to package the application, its dependencies and configuration into a container image. It isolates the application from others on a shared operating system. The containers run on top of a container host (for example Docker) and the host runs on the OS. As the OS is shared by the containers, they have significantly smaller footprint compared to traditional virtual machines. &lt;a href=&#34;https://docs.microsoft.com/en-us/dotnet/architecture/microservices/container-docker-introduction/&#34;&gt;Source&lt;/a&gt;&lt;/p&gt;
+&lt;h3 id=&#34;development-containers-to-the-rescue&#34;&gt;Development containers to the rescue&lt;/h3&gt;
+&lt;p&gt;Development environment can be shared with a virtual machine, and sometimes it is the better option. However, as the virtual machine image requires to package and run the entire operating system, it is burdensome to share with others and the performance is lower. The resources for the VM are reserved on startup instead of using only what is needed. It is also quite likely that developers will start to have &amp;ldquo;snowflake&amp;rdquo; boxes that have different packages and package versions.&lt;/p&gt;
+&lt;p&gt;To have a bit more dependencies than this blog site which is used later as an example, lets pick a &amp;ldquo;default&amp;rdquo; Angular project to make our case. The development environment should have NodeJS, Angular CLI and Chrome (for Karma tests) installed. Creating a virtual machine just for sharing that environment is overkill. There is way too much packaged into it, not to mention the resources wasted to run virtualized OS on top of your host OS just to be able to run NodeJS, AngularCLI and Chrome. So using a container seems to be a better alternative.&lt;/p&gt;
+&lt;p&gt;Development containers can be a bit different than the small containers used in production. When the container image is only used for development purposes, there is no need to keep them as tiny as possible. You can install whatever tools you need as its only for development. For the image base you can start with the &amp;ldquo;regular&amp;rdquo; ones instead of Alpine or slim versions. You also rarely need to rebuild the image, only when the tools change. When you need to install a tool for development you can either install it directly inside the container (maybe you only need it for the current thing you are working on) or include it in the Dockerfile for the whole team to enjoy. (There is also &lt;code&gt;postCreateCommand&lt;/code&gt;-setting in the &lt;code&gt;devcontainer.json&lt;/code&gt; for e.g. installing packages).&lt;/p&gt;
+&lt;p&gt;Sharing with the team is easy, you keep the Dockerfile versioned in the git repository and each developer builds their own image based on it. You don&amp;rsquo;t have to commit and set up Docker registeries at this point. To keep the packages unified across environments, its a good idea to pin specific package and image versions you are using instead of :latest or :lts.&lt;/p&gt;
+&lt;p&gt;Due to the isolated nature of the containers and images, you can remove them after they are no longer needed and all the project specific dependencies are gone. Working with multiple projects becomes easier as all the packages and versions are isolated in own environments.&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Okay cool, nothing new here. I already know what containers have to offer. The problem is that me and/or my team have limited knowledge about Docker. We cannot start using them without investing a lot of time and effort on competence development.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Enter VSCode with &lt;a href=&#34;https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers&#34;&gt;Remote - Containers plugin&lt;/a&gt;. It allows for a pleasant development experience with minimal Docker knowledge. You can use Microsofts provided samples as a base image or your own Dockerfile.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-json&#34; data-lang=&#34;json&#34;&gt;{
+    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;name&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Personal blog&amp;#34;&lt;/span&gt;,
+    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;build&amp;#34;&lt;/span&gt;: {
+        &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;dockerfile&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;Dockerfile&amp;#34;&lt;/span&gt;,
+    },
+    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;forwardPorts&amp;#34;&lt;/span&gt;: [
+        &lt;span style=&#34;color:#ae81ff&#34;&gt;1313&lt;/span&gt;
+    ],
+    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;mounts&amp;#34;&lt;/span&gt;: [
+        &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;source=${localWorkspaceFolder},target=/src,type=bind,consistency=cached&amp;#34;&lt;/span&gt;
+    ],
+    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;extensions&amp;#34;&lt;/span&gt;: [
+        &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;vscodevim.vim&amp;#34;&lt;/span&gt;,
+    ],
+    &lt;span style=&#34;color:#f92672&#34;&gt;&amp;#34;containerUser&amp;#34;&lt;/span&gt;: &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;hugo&amp;#34;&lt;/span&gt;
+}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This is the &lt;code&gt;devcontainer.json&lt;/code&gt; file I use for this blog. With a couple of lines of configuration, I can start a VSCode instance inside the container, forwarding the ports and automatically installing the extensions I want. I can also share this with others along with the dockerfile to share the environments.&lt;/p&gt;
+&lt;details&gt;
+&lt;summary&gt;Development Dockerfile for this blog&lt;/summary&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-Dockerfile&#34; data-lang=&#34;Dockerfile&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;FROM&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; klakegg/hugo:0.78.2-ext-debian&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;WORKDIR&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; /src&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Create group hugo and user to said group named hugo. &lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# -m switch creates home directory /home/hugo which is needed for devcontainer&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;RUN&lt;/span&gt; groupadd -r hugo &lt;span style=&#34;color:#f92672&#34;&gt;&amp;amp;&amp;amp;&lt;/span&gt; useradd -m -g hugo hugo&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;ENTRYPOINT&lt;/span&gt; [ &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;shell&amp;#34;&lt;/span&gt; ]&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/details&gt;
+&lt;p&gt;Both the Dockerfile and the devcontainer.json file are stored in &lt;code&gt;.devcontainer&lt;/code&gt; folder which is the convention.
+&lt;figure&gt;
+    &lt;img src=&#34;https://kimisc.github.io/img/devcontainers/devcontainer_options.jpg&#34;
+         alt=&#34;Available options inside the container&#34;/&gt; &lt;figcaption&gt;
+            &lt;p&gt;Available options inside the container&lt;/p&gt;
+        &lt;/figcaption&gt;
+&lt;/figure&gt;
+&lt;/p&gt;
+&lt;p&gt;Typing &lt;code&gt;&amp;gt;Remote containers&lt;/code&gt; to the command palette shows the available options. To start VSCode inside the devcontainer, make sure you have the prequisites in check and start by selecting &lt;code&gt;Remote-Containers: Rebuild and Reopen in Container&lt;/code&gt; from the command menu. When you are running VSCode inside the container, you can rebuild the container to apply changes to your Dockerfile / devcontainer configuration. If you want to exit the container and return to &amp;ldquo;normal&amp;rdquo;, select &lt;code&gt;Remote-Containers: Reopen Locally&lt;/code&gt; as shown in the picture.&lt;/p&gt;
+&lt;p&gt;After that massive introduction that is pretty much it. If the setup is done correctly you are running VSCode inside the container. (To be precise, VSCode is still ran on the host and it communicates with VSCode server inside the container). VSCode handles the starting automatically and most of the time you don&amp;rsquo;t even notice anything different. Except now you have isolated, documented and shareable development environment. &lt;a href=&#34;https://code.visualstudio.com/docs/remote/containers-advanced#_developing-inside-a-container-on-a-remote-docker-host&#34;&gt;It is also possible to connect to a container in a remote host!&lt;/a&gt;&lt;/p&gt;
+&lt;figure&gt;
+    &lt;img src=&#34;https://kimisc.github.io/img/devcontainers/devcontainer_indicator.jpg&#34;
+         alt=&#34;When VSCode is running inside the container, the indicator is shown on the bottom left.&#34;/&gt; &lt;figcaption&gt;
+            &lt;p&gt;When VSCode is running inside the container, the indicator is shown on the bottom left.&lt;/p&gt;
+        &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;h4 id=&#34;closing-thoughts&#34;&gt;Closing thoughts&lt;/h4&gt;
+&lt;p&gt;Docker and containers are nothing new under the sun and development environments as well as production environments have been packaged into containers for a while now. The real value is in the VSCode integration. Working inside a development container seems to &amp;ldquo;just work&amp;rdquo;. You can start reaping the benefits of isolated and unified development containers without spending a lot of time on learning the specific Docker workflows and commands.&lt;/p&gt;
+&lt;p&gt;See the &lt;a href=&#34;https://code.visualstudio.com/docs/remote/containers-tutorial&#34;&gt;&amp;ldquo;Remote containers tutorial&amp;rdquo;&lt;/a&gt; and &lt;a href=&#34;https://code.visualstudio.com/docs/remote/containers-advanced&#34;&gt;&amp;ldquo;Advanced containers&amp;rdquo;&lt;/a&gt; for more information.&lt;/p&gt;
+</description>
+     </item>
+   
+     <item>
        <title>Simplifying Test Setup with Fluent Builder</title>
        <link>https://kimisc.github.io/posts/simplify-test-setup-fluent-builder/</link>
        <pubDate>Thu, 23 Jan 2020 08:46:30 +0200</pubDate>

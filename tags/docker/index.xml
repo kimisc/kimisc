@@ -1,16 +1,16 @@
 
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
  <channel>
-   <title>csharp on Kim Arpiainen</title>
-   <link>https://kimisc.github.io/tags/csharp/</link>
-   <description>Recent content in csharp on Kim Arpiainen</description>
+   <title>docker on Kim Arpiainen</title>
+   <link>https://kimisc.github.io/tags/docker/</link>
+   <description>Recent content in docker on Kim Arpiainen</description>
    <generator>Hugo -- gohugo.io</generator>
    <language>en-us</language>
    <managingEditor>kimarp15@gmail.com (Kim Arpiainen)</managingEditor>
    <webMaster>kimarp15@gmail.com (Kim Arpiainen)</webMaster>
-   <lastBuildDate>Thu, 10 Oct 2019 08:46:30 +0200</lastBuildDate>
+   <lastBuildDate>Wed, 30 Dec 2020 08:46:30 +0200</lastBuildDate>
    
-       <atom:link href="https://kimisc.github.io/tags/csharp/index.xml" rel="self" type="application/rss+xml" />
+       <atom:link href="https://kimisc.github.io/tags/docker/index.xml" rel="self" type="application/rss+xml" />
    
    
      <item>
