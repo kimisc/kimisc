@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Personal thoughts about programming" />
-  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.83.1" />
+  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.78.2" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
 <script src="/js/font-awesome/all.min.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda" />
@@ -98,16 +98,16 @@
     <p>Its quite common in business to have requirements that when A happens, B needs to happen too. In the following imaginary example, the requirement is to increment the car owner count each time the owner changes. One way to implement it is to increment the counter in the setter. That way the developers don&rsquo;t have to remember to increment the counter each time owner is changed, updating the property is enough. In a bigger project this could be a domain event e.g. <code>CarOwnerChangedEvent</code> and the handler would take care of this. To keep things simple, we just increment the counter.</p>
 <div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Car</span>
 {
-    <span style="color:#66d9ef">private</span> Owner <span style="color:#ae81ff">_</span>owner;
+    <span style="color:#66d9ef">private</span> Owner _owner;
     <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> Id { <span style="color:#66d9ef">get</span>; <span style="color:#66d9ef">set</span>; }
     <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> OwnerCount {<span style="color:#66d9ef">get</span>; <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">set</span>;}
     <span style="color:#66d9ef">public</span> Owner Owner {
         <span style="color:#66d9ef">get</span> {
-            <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">_</span>owner;
+            <span style="color:#66d9ef">return</span> _owner;
         }
         <span style="color:#66d9ef">set</span> {
             OwnerCount++;
-            <span style="color:#ae81ff">_</span>owner = <span style="color:#66d9ef">value</span>;
+            _owner = <span style="color:#66d9ef">value</span>;
         }
     }
 }
@@ -121,7 +121,7 @@
 
     <span style="color:#66d9ef">public</span> Car GetCarById(<span style="color:#66d9ef">int</span> id)
     {
-        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">_</span>context.Cars
+        <span style="color:#66d9ef">return</span> _context.Cars
             .Include(x =&gt; x.Owner)
             .FirstOrDefault(x =&gt; x.Id == id);
     }

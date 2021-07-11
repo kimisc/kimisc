@@ -1,16 +1,16 @@
 
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
  <channel>
-   <title>Programming on Kim Arpiainen</title>
-   <link>https://kimisc.github.io/categories/programming/</link>
-   <description>Recent content in Programming on Kim Arpiainen</description>
+   <title>Azure DevOps on Kim Arpiainen</title>
+   <link>https://kimisc.github.io/tags/azure-devops/</link>
+   <description>Recent content in Azure DevOps on Kim Arpiainen</description>
    <generator>Hugo -- gohugo.io</generator>
    <language>en-us</language>
    <managingEditor>kimarp15@gmail.com (Kim Arpiainen)</managingEditor>
    <webMaster>kimarp15@gmail.com (Kim Arpiainen)</webMaster>
    <lastBuildDate>Sun, 11 Jul 2021 00:00:30 +0200</lastBuildDate>
    
-       <atom:link href="https://kimisc.github.io/categories/programming/index.xml" rel="self" type="application/rss+xml" />
+       <atom:link href="https://kimisc.github.io/tags/azure-devops/index.xml" rel="self" type="application/rss+xml" />
    
    
      <item>

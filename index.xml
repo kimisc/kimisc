@@ -8,10 +8,141 @@
    <language>en-us</language>
    <managingEditor>kimarp15@gmail.com (Kim Arpiainen)</managingEditor>
    <webMaster>kimarp15@gmail.com (Kim Arpiainen)</webMaster>
-   <lastBuildDate>Wed, 30 Dec 2020 08:46:30 +0200</lastBuildDate>
+   <lastBuildDate>Sun, 11 Jul 2021 00:00:30 +0200</lastBuildDate>
    
        <atom:link href="https://kimisc.github.io/index.xml" rel="self" type="application/rss+xml" />
    
+   
+     <item>
+       <title>Containerized CI Pipeline</title>
+       <link>https://kimisc.github.io/posts/containerized-ci-pipeline/</link>
+       <pubDate>Sun, 11 Jul 2021 00:00:30 +0200</pubDate>
+       <author>kimarp15@gmail.com (Kim Arpiainen)</author>
+       <guid>https://kimisc.github.io/posts/containerized-ci-pipeline/</guid>
+       <description>&lt;p&gt;Its possible to use Docker for building, linting, testing and packaging the project. This way its possible to have the same &amp;ldquo;pipeline&amp;rdquo; locally and on the CI server. The local debugging and speed is the most obvious benefit, but it also means that you are not that deeply vendor locked compared to using e.g. Azure DevOps pipeline tasks for each specific step. It will also greatly simplify the pipeline configuration.&lt;/p&gt;
+&lt;p&gt;Simple example for a build process would be just to build the project and run tests. Below is an example Dockerfile for reference.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-Dockerfile&#34; data-lang=&#34;Dockerfile&#34;&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Base layer to copy the sources and run restore.&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;FROM&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; mcr.microsoft.com/dotnet/sdk:5.0 AS build-base&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;WORKDIR&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; /src&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;COPY&lt;/span&gt; . .&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;RUN&lt;/span&gt; dotnet restore HelloWorld.sln&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Run tests and collect coverage&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;FROM&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; build-base AS test&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;RUN&lt;/span&gt; dotnet test tests/**/*.csproj --logger trx --collect:&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;XPlat Code Coverage&amp;#34;&lt;/span&gt; --results-directory TestResults --no-restore&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Build and publish&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;FROM&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; build-base AS publish&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;RUN&lt;/span&gt; dotnet publish &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;src/HelloWorld/HelloWorld.csproj&amp;#34;&lt;/span&gt; -c Release -o /app/publish&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Grab the built files from publish layer and copy them over.&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Create the final runtime image&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;FROM&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; mcr.microsoft.com/dotnet/aspnet:5.0-alpine AS final&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;EXPOSE&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; 80&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;WORKDIR&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; /app&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;COPY&lt;/span&gt; --from&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;publish /app/publish .&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;ENTRYPOINT&lt;/span&gt; [&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;dotnet&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;HelloWorld.dll&amp;#34;&lt;/span&gt;]&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;With the example Dockerfile, its possible to test and build the project. However, running basic &lt;code&gt;docker build&lt;/code&gt; command does not run the &lt;code&gt;test&lt;/code&gt; stage as the &lt;code&gt;final&lt;/code&gt; stage does not depend on it. To run the test stage only use the &lt;code&gt;--target&lt;/code&gt; flag. &lt;code&gt;docker build --target test -f src/HelloWorld/Dockerfile .&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;With the target flag its possible to run any stage from the Dockerfile. This helps when you want to run the stage that is failing, for example the unit tests. However, using the &lt;code&gt;--target&lt;/code&gt; flag is a bit cumbersome, and what if there is a need to run all stages, or there are multiple stages that should be run separately?&lt;/p&gt;
+&lt;p&gt;For simplifying the commands we can use &lt;a href=&#34;https://www.gnu.org/software/make/manual/make.html&#34;&gt;Gnu Make&lt;/a&gt;. The stages can be added to the &lt;code&gt;Makefile&lt;/code&gt; for developer friendly commands.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-Makefile&#34; data-lang=&#34;Makefile&#34;&gt;imageTag &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; docker-ci:latest
+&lt;span style=&#34;color:#a6e22e&#34;&gt;.PHONY&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; all build test final
+
+&lt;span style=&#34;color:#a6e22e&#34;&gt;all&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; build test final
+
+&lt;span style=&#34;color:#a6e22e&#34;&gt;build&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;
+  @DOCKER_BUILDKIT&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; docker build -f src/HelloWorld/Dockerfile . --target publish
+&lt;span style=&#34;color:#a6e22e&#34;&gt;test&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;
+  @DOCKER_BUILDKIT&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; docker build -f src/HelloWorld/Dockerfile . --target test
+&lt;span style=&#34;color:#a6e22e&#34;&gt;final&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;
+  @DOCKER_BUILDKIT&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; docker build -f src/HelloWorld/Dockerfile -t &lt;span style=&#34;color:#66d9ef&#34;&gt;$(&lt;/span&gt;imageTag&lt;span style=&#34;color:#66d9ef&#34;&gt;)&lt;/span&gt; . --target final
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;With the Makefile we can now run the stages declared in it with &lt;code&gt;make &amp;lt;stage&amp;gt;&lt;/code&gt; e.g. &lt;code&gt;make test&lt;/code&gt;. We also have targets &lt;code&gt;all&lt;/code&gt;, &lt;code&gt;build&lt;/code&gt; and &lt;code&gt;final&lt;/code&gt;, where &lt;code&gt;all&lt;/code&gt; runs all of the declared stages, build does &lt;code&gt;dotnet publish&lt;/code&gt; and final builds the Docker image. Custom tag can be provided by running &lt;code&gt;make final imageTag=&amp;lt;your-tag-here&amp;gt;&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;a href=&#34;https://www.gnu.org/software/make/manual/html_node/Phony-Targets.html&#34;&gt;&lt;code&gt;.PHONY&lt;/code&gt; targets&lt;/a&gt; are targets that do not generate a file with the same name. Thus if you leave it out and create a file with the target name e.g. &lt;code&gt;test&lt;/code&gt;, it will not run the stage as it will think its already ran with the message &lt;code&gt;make: &#39;test&#39; is up to date.&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;BuildKit is an improved builder for Docker. It is more performant than the default builder as it can run build steps in parallel and add other optimizations. It also has some additional features such as build cache import/export which is not used here. It is currently an opt-in fature and it works only on Linux containers. More information in &lt;a href=&#34;https://docs.docker.com/develop/develop-images/build_enhancements/&#34;&gt;Docker docs&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;As the docs recommend enabling it per command, the &lt;code&gt;DOCKER_BUILDKIT=1&lt;/code&gt; is prepended to each build command in the Makefile. This will enable it per command for each developer, not messing up other Docker configuration and ready to go after getting the source.&lt;/p&gt;
+&lt;p&gt;Thus far the example project has now build and test stages containerized which hopefully limits the environmental differences between the developers. Using GNU Make added simplicity to the commands, which improves the development workflow. To get benefits from automation too, the same stages should be implemented in CI server. I will use Azure DevOps as an example, but as the stages are ran using Docker, the setup is similar with other solutions too.&lt;/p&gt;
+&lt;p&gt;Example &lt;code&gt;azure-pipelines.yml&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#f92672&#34;&gt;trigger&lt;/span&gt;:
+- &lt;span style=&#34;color:#ae81ff&#34;&gt;master&lt;/span&gt;
+
+&lt;span style=&#34;color:#f92672&#34;&gt;pool&lt;/span&gt;:
+  &lt;span style=&#34;color:#f92672&#34;&gt;vmImage&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;ubuntu-latest&lt;/span&gt;
+
+&lt;span style=&#34;color:#f92672&#34;&gt;variables&lt;/span&gt;:
+  &lt;span style=&#34;color:#f92672&#34;&gt;DOCKER_BUILDKIT&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;
+
+&lt;span style=&#34;color:#f92672&#34;&gt;steps&lt;/span&gt;:
+- &lt;span style=&#34;color:#f92672&#34;&gt;bash&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;make build&lt;/span&gt;
+- &lt;span style=&#34;color:#f92672&#34;&gt;bash&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;make test&lt;/span&gt;
+- &lt;span style=&#34;color:#f92672&#34;&gt;bash&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;make final&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;That is it. The Azure DevOps pipeline uses simple bash steps, as Docker is installed on the Microsoft Hosted Agents. The exact same pipeline can be debugged locally and the pipeline configuration file remains short and readable. However, to improve the readability on the CI side, descriptions for the steps should be added.&lt;/p&gt;
+&lt;h2 id=&#34;getting-test-results-from-the-test-stage&#34;&gt;Getting test results from the test stage&lt;/h2&gt;
+&lt;p&gt;With the current configuration, the test step will fail and show the results in stdout. However, now that there is a CI setup in place, it would be good to get the test results visible for the whole project. To do that, the test results need to be exported from the build stage.&lt;/p&gt;
+&lt;p&gt;The new stage is &lt;code&gt;test-output&lt;/code&gt;. This could be used as the target for testing to get the results on each test run.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-Dockerfile&#34; data-lang=&#34;Dockerfile&#34;&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;FROM&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; mcr.microsoft.com/dotnet/sdk:5.0 AS build-base&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;WORKDIR&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; /src&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;COPY&lt;/span&gt; . .&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;RUN&lt;/span&gt; dotnet restore HelloWorld.sln&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;FROM&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; build-base AS test&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;RUN&lt;/span&gt; dotnet test tests/**/*.csproj --logger trx --collect:&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;XPlat Code Coverage&amp;#34;&lt;/span&gt; --results-directory TestResults --no-restore&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#75715e&#34;&gt;# Copy test results to empty &amp;#39;scratch&amp;#39; container.&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;FROM&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; scratch as test-output&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;COPY&lt;/span&gt; --from&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;test /src/TestResults/ /&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;FROM&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; build-base AS publish&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;RUN&lt;/span&gt; dotnet publish &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;src/HelloWorld/HelloWorld.csproj&amp;#34;&lt;/span&gt; -c Release -o /app/publish&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;FROM&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; mcr.microsoft.com/dotnet/aspnet:5.0-alpine AS deploy-base&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;EXPOSE&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; 80&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;WORKDIR&lt;/span&gt;&lt;span style=&#34;color:#e6db74&#34;&gt; /app&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;COPY&lt;/span&gt; --from&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;publish /app/publish .&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;&lt;/span&gt;&lt;span style=&#34;color:#66d9ef&#34;&gt;ENTRYPOINT&lt;/span&gt; [&lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;dotnet&amp;#34;&lt;/span&gt;, &lt;span style=&#34;color:#e6db74&#34;&gt;&amp;#34;HelloWorld.dll&amp;#34;&lt;/span&gt;]&lt;span style=&#34;color:#960050;background-color:#1e0010&#34;&gt;
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;This will copy the output from &lt;code&gt;backend-test&lt;/code&gt; stage to an empty container. Using the &lt;code&gt;-output&lt;/code&gt; or &lt;code&gt;-o&lt;/code&gt; flag we can get the files from the container to the host machine.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-Makefile&#34; data-lang=&#34;Makefile&#34;&gt;imageTag &lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt; docker-ci:latest
+
+&lt;span style=&#34;color:#a6e22e&#34;&gt;.PHONY&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; all test build final
+
+&lt;span style=&#34;color:#a6e22e&#34;&gt;all&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt; test final
+
+&lt;span style=&#34;color:#a6e22e&#34;&gt;build&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;
+	@DOCKER_BUILDKIT&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; docker build -f src/HelloWorld/Dockerfile . --target publish
+&lt;span style=&#34;color:#a6e22e&#34;&gt;test&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;
+    @DOCKER_BUILDKIT&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; docker build -f src/HelloWorld/Dockerfile . --target test-output -o TestResults
+&lt;span style=&#34;color:#a6e22e&#34;&gt;final&lt;/span&gt;&lt;span style=&#34;color:#f92672&#34;&gt;:&lt;/span&gt;
+    @DOCKER_BUILDKIT&lt;span style=&#34;color:#f92672&#34;&gt;=&lt;/span&gt;&lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt; docker build -f src/HelloWorld/Dockerfile -t &lt;span style=&#34;color:#66d9ef&#34;&gt;$(&lt;/span&gt;imageTag&lt;span style=&#34;color:#66d9ef&#34;&gt;)&lt;/span&gt; . --target final
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;To get the test results visible to Azure Devops, the &lt;code&gt;PublishTestResults&lt;/code&gt; task is required. Here is the full &lt;code&gt;azure-pipelines.yml&lt;/code&gt; configuration.&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre style=&#34;color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span style=&#34;color:#f92672&#34;&gt;trigger&lt;/span&gt;:
+- &lt;span style=&#34;color:#ae81ff&#34;&gt;master&lt;/span&gt;
+
+&lt;span style=&#34;color:#f92672&#34;&gt;pool&lt;/span&gt;:
+  &lt;span style=&#34;color:#f92672&#34;&gt;vmImage&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;ubuntu-latest&lt;/span&gt;
+
+&lt;span style=&#34;color:#f92672&#34;&gt;variables&lt;/span&gt;:
+  &lt;span style=&#34;color:#f92672&#34;&gt;DOCKER_BUILDKIT&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;1&lt;/span&gt;
+
+&lt;span style=&#34;color:#f92672&#34;&gt;steps&lt;/span&gt;:
+- &lt;span style=&#34;color:#f92672&#34;&gt;bash&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;make build&lt;/span&gt;
+- &lt;span style=&#34;color:#f92672&#34;&gt;bash&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;make test&lt;/span&gt;
+- &lt;span style=&#34;color:#f92672&#34;&gt;bash&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;make final&lt;/span&gt;
+- &lt;span style=&#34;color:#f92672&#34;&gt;task&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;PublishTestResults@2&lt;/span&gt;
+  &lt;span style=&#34;color:#f92672&#34;&gt;inputs&lt;/span&gt;:
+    &lt;span style=&#34;color:#f92672&#34;&gt;testResultsFormat&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;VSTest&lt;/span&gt;
+    &lt;span style=&#34;color:#f92672&#34;&gt;testResultsFiles&lt;/span&gt;: &lt;span style=&#34;color:#ae81ff&#34;&gt;TestResults/*.trx&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;figure&gt;
+    &lt;img src=&#34;https://kimisc.github.io/img/containerized-ci/azuredevops-tests.png&#34;
+         alt=&#34;Test results shown in Azure DevOps&#34;/&gt; &lt;figcaption&gt;
+            &lt;p&gt;Test results shown in Azure DevOps&lt;/p&gt;
+        &lt;/figcaption&gt;
+&lt;/figure&gt;
+
+&lt;h2 id=&#34;closing-thoughts&#34;&gt;Closing thoughts&lt;/h2&gt;
+&lt;p&gt;Even with the simple configuration without all BuildKits features, the setup still provides faster and easier debugging and development. It should also be quite easy to change to any other CI provider and thus reduce vendor lock. Of course there are other things to consider before doing that.&lt;/p&gt;
+&lt;p&gt;As a slight drawback if you want to fully Dockerize the setup and need some outside dependency (e.g. a browser for frontend testing), you have to maintain those images yourself. Or one option would be to run those steps directly on the CI host, as e.g. Microsoft Hosted Agents in Azure DevOps have bunch of useful dependencies pre-installed.&lt;/p&gt;
+&lt;p&gt;I highly recommend reading the &lt;a href=&#34;https://www.docker.com/blog/tag/go-env-series/&#34;&gt;3 part blog series&lt;/a&gt; about the topic by Chris Crone. The environment in the series is for Go development, but it can be applied to other languages and environments as well.&lt;/p&gt;
+</description>
+     </item>
    
      <item>
        <title>Development environment in a container with Remote Containers</title>

@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Personal thoughts about programming" />
-  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.83.1" />
+  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.78.2" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
 <script src="/js/font-awesome/all.min.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda" />
@@ -111,28 +111,28 @@
 </span><span style="color:#75715e">// not referenced nor part of production code
 </span><span style="color:#75715e"></span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">CustomerBuilder</span> {
 
-    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">string</span> <span style="color:#ae81ff">_</span>name = <span style="color:#e6db74">&#34;Jon&#34;</span>; <span style="color:#75715e">// you can have defaults here
-</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> <span style="color:#ae81ff">_</span>age;
-    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">string</span> <span style="color:#ae81ff">_</span>email;
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">string</span> _name = <span style="color:#e6db74">&#34;Jon&#34;</span>; <span style="color:#75715e">// you can have defaults here
+</span><span style="color:#75715e"></span>    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">int</span> _age;
+    <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">string</span> _email;
 
     <span style="color:#66d9ef">public</span> CustomerBuilder() {
         <span style="color:#75715e">// or if you prefer to explicitly set the defaults in the constructor
-</span><span style="color:#75715e"></span>        <span style="color:#ae81ff">_</span>age = <span style="color:#ae81ff">25</span>;
-        <span style="color:#ae81ff">_</span>email = <span style="color:#e6db74">&#34;something@something.com&#34;</span>;
+</span><span style="color:#75715e"></span>        _age = <span style="color:#ae81ff">25</span>;
+        _email = <span style="color:#e6db74">&#34;something@something.com&#34;</span>;
     }
 
     <span style="color:#66d9ef">public</span> CustomerBuilder WithName(<span style="color:#66d9ef">string</span> name) {
-        <span style="color:#ae81ff">_</span>name = name;
+        _name = name;
         <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span>;
     }
 
     <span style="color:#66d9ef">public</span> CustomerBuilder WithAge(<span style="color:#66d9ef">int</span> age) {
-        <span style="color:#ae81ff">_</span>age = age;
+        _age = age;
         <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">this</span>;
     }
 
     <span style="color:#66d9ef">public</span> Customer Build() {
-        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> Customer(<span style="color:#ae81ff">_</span>name, <span style="color:#ae81ff">_</span>age, <span style="color:#ae81ff">_</span>email);
+        <span style="color:#66d9ef">return</span> <span style="color:#66d9ef">new</span> Customer(_name, _age, _email);
     }
 }
 </code></pre></div><p>With the Fluent Builder setup we can now easily create different types of customers.</p>
