@@ -7,9 +7,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Personal thoughts about programming" />
-  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.78.2" />
+  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.87.0" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
 <script src="/js/font-awesome/all.min.js"></script>
+<script async defer data-domain="kimisc.github.io" src="https://analytics.kimisc.xyz/js/plausible.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda" />
 <link rel="stylesheet" type="text/css" href="/css/styles.css" />
 <link rel="stylesheet" type="text/css" href="/css/prism.css" /></head>
@@ -109,7 +110,7 @@
 <p>Okay cool, nothing new here. I already know what containers have to offer. The problem is that me and/or my team have limited knowledge about Docker. We cannot start using them without investing a lot of time and effort on competence development.</p>
 </blockquote>
 <p>Enter VSCode with <a href="https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers">Remote - Containers plugin</a>. It allows for a pleasant development experience with minimal Docker knowledge. You can use Microsofts provided samples as a base image or your own Dockerfile.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-json" data-lang="json">{
     <span style="color:#f92672">&#34;name&#34;</span>: <span style="color:#e6db74">&#34;Personal blog&#34;</span>,
     <span style="color:#f92672">&#34;build&#34;</span>: {
         <span style="color:#f92672">&#34;dockerfile&#34;</span>: <span style="color:#e6db74">&#34;Dockerfile&#34;</span>,
@@ -128,7 +129,7 @@
 </code></pre></div><p>This is the <code>devcontainer.json</code> file I use for this blog. With a couple of lines of configuration, I can start a VSCode instance inside the container, forwarding the ports and automatically installing the extensions I want. I can also share this with others along with the dockerfile to share the environments.</p>
 <details>
 <summary>Development Dockerfile for this blog</summary>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> klakegg/hugo:0.78.2-ext-debian</span><span style="color:#960050;background-color:#1e0010">
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> klakegg/hugo:0.78.2-ext-debian</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /src</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010">
@@ -139,18 +140,16 @@
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span> [ <span style="color:#e6db74">&#34;shell&#34;</span> ]<span style="color:#960050;background-color:#1e0010">
 </span></code></pre></div></details>
 <p>Both the Dockerfile and the devcontainer.json file are stored in <code>.devcontainer</code> folder which is the convention.
-<figure>
-    <img src="/img/devcontainers/devcontainer_options.jpg"
-         alt="Available options inside the container"/> <figcaption>
+<figure><img src="/img/devcontainers/devcontainer_options.jpg"
+         alt="Available options inside the container"/><figcaption>
             <p>Available options inside the container</p>
         </figcaption>
 </figure>
 </p>
 <p>Typing <code>&gt;Remote containers</code> to the command palette shows the available options. To start VSCode inside the devcontainer, make sure you have the prequisites in check and start by selecting <code>Remote-Containers: Rebuild and Reopen in Container</code> from the command menu. When you are running VSCode inside the container, you can rebuild the container to apply changes to your Dockerfile / devcontainer configuration. If you want to exit the container and return to &ldquo;normal&rdquo;, select <code>Remote-Containers: Reopen Locally</code> as shown in the picture.</p>
 <p>After that massive introduction that is pretty much it. If the setup is done correctly you are running VSCode inside the container. (To be precise, VSCode is still ran on the host and it communicates with VSCode server inside the container). VSCode handles the starting automatically and most of the time you don&rsquo;t even notice anything different. Except now you have isolated, documented and shareable development environment. <a href="https://code.visualstudio.com/docs/remote/containers-advanced#_developing-inside-a-container-on-a-remote-docker-host">It is also possible to connect to a container in a remote host!</a></p>
-<figure>
-    <img src="/img/devcontainers/devcontainer_indicator.jpg"
-         alt="When VSCode is running inside the container, the indicator is shown on the bottom left."/> <figcaption>
+<figure><img src="/img/devcontainers/devcontainer_indicator.jpg"
+         alt="When VSCode is running inside the container, the indicator is shown on the bottom left."/><figcaption>
             <p>When VSCode is running inside the container, the indicator is shown on the bottom left.</p>
         </figcaption>
 </figure>

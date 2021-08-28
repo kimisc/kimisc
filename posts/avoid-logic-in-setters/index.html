@@ -7,9 +7,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Personal thoughts about programming" />
-  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.78.2" />
+  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.87.0" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
 <script src="/js/font-awesome/all.min.js"></script>
+<script async defer data-domain="kimisc.github.io" src="https://analytics.kimisc.xyz/js/plausible.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda" />
 <link rel="stylesheet" type="text/css" href="/css/styles.css" />
 <link rel="stylesheet" type="text/css" href="/css/prism.css" /></head>
@@ -96,18 +97,18 @@
     
 
     <p>Its quite common in business to have requirements that when A happens, B needs to happen too. In the following imaginary example, the requirement is to increment the car owner count each time the owner changes. One way to implement it is to increment the counter in the setter. That way the developers don&rsquo;t have to remember to increment the counter each time owner is changed, updating the property is enough. In a bigger project this could be a domain event e.g. <code>CarOwnerChangedEvent</code> and the handler would take care of this. To keep things simple, we just increment the counter.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Car</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Car</span>
 {
-    <span style="color:#66d9ef">private</span> Owner _owner;
+    <span style="color:#66d9ef">private</span> Owner <span style="color:#ae81ff">_</span>owner;
     <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> Id { <span style="color:#66d9ef">get</span>; <span style="color:#66d9ef">set</span>; }
     <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> OwnerCount {<span style="color:#66d9ef">get</span>; <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">set</span>;}
     <span style="color:#66d9ef">public</span> Owner Owner {
         <span style="color:#66d9ef">get</span> {
-            <span style="color:#66d9ef">return</span> _owner;
+            <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">_</span>owner;
         }
         <span style="color:#66d9ef">set</span> {
             OwnerCount++;
-            _owner = <span style="color:#66d9ef">value</span>;
+            <span style="color:#ae81ff">_</span>owner = <span style="color:#66d9ef">value</span>;
         }
     }
 }
@@ -121,7 +122,7 @@
 
     <span style="color:#66d9ef">public</span> Car GetCarById(<span style="color:#66d9ef">int</span> id)
     {
-        <span style="color:#66d9ef">return</span> _context.Cars
+        <span style="color:#66d9ef">return</span> <span style="color:#ae81ff">_</span>context.Cars
             .Include(x =&gt; x.Owner)
             .FirstOrDefault(x =&gt; x.Id == id);
     }
@@ -134,7 +135,7 @@
     <span style="color:#66d9ef">public</span> DbSet&lt;Owner&gt; Owners { <span style="color:#66d9ef">get</span>; <span style="color:#66d9ef">set</span>; }
 }
 </code></pre></div><p>And of course we&rsquo;ve included a test case to prove that it works correctly.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#a6e22e">[Fact]</span>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#a6e22e">[Fact]</span>
 <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> Car_OnOwnerChange_IncrementsOwnerCount()
 {
     <span style="color:#66d9ef">var</span> car = <span style="color:#66d9ef">new</span> Car();
@@ -147,7 +148,7 @@
 <h2 id="fixing-the-issue">Fixing the issue</h2>
 <p>Personally I would fix this issue by moving the logic away from the setter, maybe even having the setter as private and have a <code>ChangeOwner(newOwner)</code> method in the <code>Car</code> class that increments the counter. The API becomes more clear and I&rsquo;m expecting additional processing as I&rsquo;m calling a method instead of a property setter. Also if we would like to include some validation to the owner change, like a null check, it would not make much sense if the setter throws an <code>ArgumentNullException</code>. In my opinion a separate method follows the <a href="https://en.wikipedia.org/wiki/Principle_of_least_astonishment">Principle of least astonishment</a> better than the property setter.</p>
 <p>There are definitely cases where having the increment in the setter is the best option. Could be for example a legacy system with dozens of references to <code>car.Owner = newOwner</code> and we need to get the business requirement filled. Or bunch of other reasons. To get the example working as expected in EF core, following configuration is required.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">override</span> <span style="color:#66d9ef">void</span> OnModelCreating(ModelBuilder modelBuilder)
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">override</span> <span style="color:#66d9ef">void</span> OnModelCreating(ModelBuilder modelBuilder)
 {
     <span style="color:#66d9ef">var</span> navigation = modelBuilder.Entity&lt;Car&gt;()
         .Metadata.FindNavigation(nameof(Car.Owner));
