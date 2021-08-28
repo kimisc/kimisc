@@ -7,7 +7,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Personal thoughts about programming" />
-  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.87.0" />
+  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.78.2" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
 <script src="/js/font-awesome/all.min.js"></script>
 <script async defer data-domain="kimisc.github.io" src="https://analytics.kimisc.xyz/js/plausible.js"></script>
@@ -95,7 +95,7 @@
 
     <p>It&rsquo;s possible to use Docker for building, linting, testing and packaging the project. This way its possible to have the same &ldquo;pipeline&rdquo; locally and on the CI server. The local debugging and speed is the most obvious benefit, but it also means that you are not that deeply vendor locked compared to using e.g. Azure DevOps pipeline tasks for each specific step. It will also greatly simplify the pipeline configuration.</p>
 <p>Simple example for a build process would be just to build the project and run tests. Below is an example Dockerfile for reference.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#75715e"># Base layer to copy the sources and run restore.</span><span style="color:#960050;background-color:#1e0010">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#75715e"># Base layer to copy the sources and run restore.</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> mcr.microsoft.com/dotnet/sdk:5.0 AS build-base</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /src</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> . .<span style="color:#960050;background-color:#1e0010">
@@ -119,7 +119,7 @@
 </span></code></pre></div><p>With the example Dockerfile, its possible to test and build the project. However, running basic <code>docker build</code> command does not run the <code>test</code> stage as the <code>final</code> stage does not depend on it. To run the test stage only use the <code>--target</code> flag. <code>docker build --target test -f src/HelloWorld/Dockerfile .</code></p>
 <p>With the target flag its possible to run any stage from the Dockerfile. This helps when you want to run the stage that is failing, for example the unit tests. However, using the <code>--target</code> flag is a bit cumbersome, and what if there is a need to run all stages, or there are multiple stages that should be run separately?</p>
 <p>For simplifying the commands we can use <a href="https://www.gnu.org/software/make/manual/make.html">Gnu Make</a>. The stages can be added to the <code>Makefile</code> for developer friendly commands.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Makefile" data-lang="Makefile">imageTag <span style="color:#f92672">=</span> docker-ci:latest
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Makefile" data-lang="Makefile">imageTag <span style="color:#f92672">=</span> docker-ci:latest
 <span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> all build test final
 
 <span style="color:#a6e22e">all</span><span style="color:#f92672">:</span> build test final
@@ -136,7 +136,7 @@
 <p>As the docs recommend enabling it per command, the <code>DOCKER_BUILDKIT=1</code> is prepended to each build command in the Makefile. This will enable it per command for each developer, not messing up other Docker configuration and ready to go after getting the source.</p>
 <p>Thus far the example project has now build and test stages containerized which hopefully limits the environmental differences between the developers. Using GNU Make added simplicity to the commands, which improves the development workflow. To get benefits from automation too, the same stages should be implemented in CI server. I will use Azure DevOps as an example, but as the stages are ran using Docker, the setup is similar with other solutions too.</p>
 <p>Example <code>azure-pipelines.yml</code></p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">trigger</span>:
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">trigger</span>:
 - <span style="color:#ae81ff">master</span>
 
 <span style="color:#f92672">pool</span>:
@@ -153,7 +153,7 @@
 <h2 id="getting-test-results-from-the-test-stage">Getting test results from the test stage</h2>
 <p>With the current configuration, the test step will fail and show the results in stdout. However, now that there is a CI setup in place, it would be good to get the test results visible for the whole project. To do that, the test results need to be exported from the build stage.</p>
 <p>The new stage is <code>test-output</code>. This could be used as the target for testing to get the results on each test run.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> mcr.microsoft.com/dotnet/sdk:5.0 AS build-base</span><span style="color:#960050;background-color:#1e0010">
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Dockerfile" data-lang="Dockerfile"><span style="color:#66d9ef">FROM</span><span style="color:#e6db74"> mcr.microsoft.com/dotnet/sdk:5.0 AS build-base</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">WORKDIR</span><span style="color:#e6db74"> /src</span><span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> . .<span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">RUN</span> dotnet restore HelloWorld.sln<span style="color:#960050;background-color:#1e0010">
@@ -174,7 +174,7 @@
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">COPY</span> --from<span style="color:#f92672">=</span>publish /app/publish .<span style="color:#960050;background-color:#1e0010">
 </span><span style="color:#960050;background-color:#1e0010"></span><span style="color:#66d9ef">ENTRYPOINT</span> [<span style="color:#e6db74">&#34;dotnet&#34;</span>, <span style="color:#e6db74">&#34;HelloWorld.dll&#34;</span>]<span style="color:#960050;background-color:#1e0010">
 </span></code></pre></div><p>This will copy the output from <code>backend-test</code> stage to an empty container. Using the <code>-output</code> or <code>-o</code> flag we can get the files from the container to the host machine.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Makefile" data-lang="Makefile">imageTag <span style="color:#f92672">=</span> docker-ci:latest
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-Makefile" data-lang="Makefile">imageTag <span style="color:#f92672">=</span> docker-ci:latest
 
 <span style="color:#a6e22e">.PHONY</span><span style="color:#f92672">:</span> all test build final
 
@@ -187,7 +187,7 @@
 <span style="color:#a6e22e">final</span><span style="color:#f92672">:</span>
     @DOCKER_BUILDKIT<span style="color:#f92672">=</span><span style="color:#ae81ff">1</span> docker build -f src/HelloWorld/Dockerfile -t <span style="color:#66d9ef">$(</span>imageTag<span style="color:#66d9ef">)</span> . --target final
 </code></pre></div><p>To get the test results visible to Azure Devops, the <code>PublishTestResults</code> task is required. Here is the full <code>azure-pipelines.yml</code> configuration.</p>
-<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">trigger</span>:
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-yaml" data-lang="yaml"><span style="color:#f92672">trigger</span>:
 - <span style="color:#ae81ff">master</span>
 
 <span style="color:#f92672">pool</span>:
@@ -204,8 +204,9 @@
   <span style="color:#f92672">inputs</span>:
     <span style="color:#f92672">testResultsFormat</span>: <span style="color:#ae81ff">VSTest</span>
     <span style="color:#f92672">testResultsFiles</span>: <span style="color:#ae81ff">TestResults/*.trx</span>
-</code></pre></div><figure><img src="/img/containerized-ci/azuredevops-tests.png"
-         alt="Test results shown in Azure DevOps"/><figcaption>
+</code></pre></div><figure>
+    <img src="/img/containerized-ci/azuredevops-tests.png"
+         alt="Test results shown in Azure DevOps"/> <figcaption>
             <p>Test results shown in Azure DevOps</p>
         </figcaption>
 </figure>
