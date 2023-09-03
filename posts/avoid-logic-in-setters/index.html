@@ -7,10 +7,10 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="description" content="Personal thoughts about programming" />
-  <meta name="author" content="Kim Arpiainen" /><meta name="generator" content="Hugo 0.78.2" />
+  <meta name="author" content="Kim Arpiainen" />
+    <meta name="generator" content="Hugo 0.116.1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.0/normalize.min.css" />
 <script src="/js/font-awesome/all.min.js"></script>
-<script async defer data-domain="kimisc.github.io" src="https://analytics.kimisc.xyz/js/plausible.js"></script>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab|Ruda" />
 <link rel="stylesheet" type="text/css" href="/css/styles.css" />
 <link rel="stylesheet" type="text/css" href="/css/prism.css" /></head>
@@ -97,65 +97,65 @@
     
 
     <p>Its quite common in business to have requirements that when A happens, B needs to happen too. In the following imaginary example, the requirement is to increment the car owner count each time the owner changes. One way to implement it is to increment the counter in the setter. That way the developers don&rsquo;t have to remember to increment the counter each time owner is changed, updating the property is enough. In a bigger project this could be a domain event e.g. <code>CarOwnerChangedEvent</code> and the handler would take care of this. To keep things simple, we just increment the counter.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Car</span>
-{
-    <span style="color:#66d9ef">private</span> Owner _owner;
-    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> Id { <span style="color:#66d9ef">get</span>; <span style="color:#66d9ef">set</span>; }
-    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> OwnerCount {<span style="color:#66d9ef">get</span>; <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">set</span>;}
-    <span style="color:#66d9ef">public</span> Owner Owner {
-        <span style="color:#66d9ef">get</span> {
-            <span style="color:#66d9ef">return</span> _owner;
-        }
-        <span style="color:#66d9ef">set</span> {
-            OwnerCount++;
-            _owner = <span style="color:#66d9ef">value</span>;
-        }
-    }
-}
-
-<span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Client</span> {
-    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> CarSoldToNewOwner(<span style="color:#66d9ef">int</span> carId, Owner newOwner)
-    {
-        <span style="color:#66d9ef">var</span> car = GetCarById(carId);
-        car.Owner = newOwner;
-    }
-
-    <span style="color:#66d9ef">public</span> Car GetCarById(<span style="color:#66d9ef">int</span> id)
-    {
-        <span style="color:#66d9ef">return</span> _context.Cars
-            .Include(x =&gt; x.Owner)
-            .FirstOrDefault(x =&gt; x.Id == id);
-    }
-}
-
-<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DemoContext</span> : DbContext
-{
-    <span style="color:#66d9ef">public</span> DemoContext(DbContextOptions&lt;DemoContext&gt; options) : <span style="color:#66d9ef">base</span>(options){ }
-    <span style="color:#66d9ef">public</span> DbSet&lt;Car&gt; Cars { <span style="color:#66d9ef">get</span>; <span style="color:#66d9ef">set</span>; }
-    <span style="color:#66d9ef">public</span> DbSet&lt;Owner&gt; Owners { <span style="color:#66d9ef">get</span>; <span style="color:#66d9ef">set</span>; }
-}
-</code></pre></div><p>And of course we&rsquo;ve included a test case to prove that it works correctly.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#a6e22e">[Fact]</span>
-<span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> Car_OnOwnerChange_IncrementsOwnerCount()
-{
-    <span style="color:#66d9ef">var</span> car = <span style="color:#66d9ef">new</span> Car();
-    car.Owner = <span style="color:#66d9ef">new</span> Owner(<span style="color:#e6db74">&#34;owner&#34;</span>);
-    Assert.Equal(<span style="color:#ae81ff">1</span>, car.OwnerCount);
-}
-</code></pre></div><h2 id="updating-the-car-object">Updating the Car object</h2>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Car</span>
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">private</span> Owner _owner;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> Id { <span style="color:#66d9ef">get</span>; <span style="color:#66d9ef">set</span>; }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">int</span> OwnerCount {<span style="color:#66d9ef">get</span>; <span style="color:#66d9ef">private</span> <span style="color:#66d9ef">set</span>;}
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> Owner Owner {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">get</span> {
+</span></span><span style="display:flex;"><span>            <span style="color:#66d9ef">return</span> _owner;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">set</span> {
+</span></span><span style="display:flex;"><span>            OwnerCount++;
+</span></span><span style="display:flex;"><span>            _owner = <span style="color:#66d9ef">value</span>;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">class</span> <span style="color:#a6e22e">Client</span> {
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> CarSoldToNewOwner(<span style="color:#66d9ef">int</span> carId, Owner newOwner)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">var</span> car = GetCarById(carId);
+</span></span><span style="display:flex;"><span>        car.Owner = newOwner;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> Car GetCarById(<span style="color:#66d9ef">int</span> id)
+</span></span><span style="display:flex;"><span>    {
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span> _context.Cars
+</span></span><span style="display:flex;"><span>            .Include(x =&gt; x.Owner)
+</span></span><span style="display:flex;"><span>            .FirstOrDefault(x =&gt; x.Id == id);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">class</span> <span style="color:#a6e22e">DemoContext</span> : DbContext
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> DemoContext(DbContextOptions&lt;DemoContext&gt; options) : <span style="color:#66d9ef">base</span>(options){ }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> DbSet&lt;Car&gt; Cars { <span style="color:#66d9ef">get</span>; <span style="color:#66d9ef">set</span>; }
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">public</span> DbSet&lt;Owner&gt; Owners { <span style="color:#66d9ef">get</span>; <span style="color:#66d9ef">set</span>; }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>And of course we&rsquo;ve included a test case to prove that it works correctly.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#a6e22e">[Fact]</span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">public</span> <span style="color:#66d9ef">void</span> Car_OnOwnerChange_IncrementsOwnerCount()
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> car = <span style="color:#66d9ef">new</span> Car();
+</span></span><span style="display:flex;"><span>    car.Owner = <span style="color:#66d9ef">new</span> Owner(<span style="color:#e6db74">&#34;owner&#34;</span>);
+</span></span><span style="display:flex;"><span>    Assert.Equal(<span style="color:#ae81ff">1</span>, car.OwnerCount);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="updating-the-car-object">Updating the Car object</h2>
 <p>Entity Framework (EF) Core is used in the example to handle persistence for us. Now the day comes that an old car that was already in the system is sold to a new owner. <code>CarSoldToNewOwner</code> is called and car data is fetched from the database, EF creates a <code>Car</code> object for us and we change the owner. The <code>GetCarById</code> is a simple read-only query, it gets the car with the correct Id and loads the Owner data along with it.</p>
 <p>The problems arise when the saved entity is fetched from the database by our ORM. Entity framework needs to fetch the data from the database and construct objects for us to handle. The problem with setters is that ORMs <strong>can</strong> use them when creating objects. Due to wrongly configured backing field in the <code>Car</code> class (wrong being no configuration at all), EF will call the Owner setter in the <code>Car</code> class when retrieving the object in <code>GetCarById</code>. Thus the <code>CarSoldToNewOwner</code> will increment the owner counter by two instead of one, once after the read and second time by our business logic. This is definitely not obvious behavior from reading the code and thus a hard bug to track. <code>GetCarById</code> is just a simple read-only query. Although the convention for a backing field is followed, navigation properties require <strong>additional</strong> configuration.</p>
 <h2 id="fixing-the-issue">Fixing the issue</h2>
 <p>Personally I would fix this issue by moving the logic away from the setter, maybe even having the setter as private and have a <code>ChangeOwner(newOwner)</code> method in the <code>Car</code> class that increments the counter. The API becomes more clear and I&rsquo;m expecting additional processing as I&rsquo;m calling a method instead of a property setter. Also if we would like to include some validation to the owner change, like a null check, it would not make much sense if the setter throws an <code>ArgumentNullException</code>. In my opinion a separate method follows the <a href="https://en.wikipedia.org/wiki/Principle_of_least_astonishment">Principle of least astonishment</a> better than the property setter.</p>
 <p>There are definitely cases where having the increment in the setter is the best option. Could be for example a legacy system with dozens of references to <code>car.Owner = newOwner</code> and we need to get the business requirement filled. Or bunch of other reasons. To get the example working as expected in EF core, following configuration is required.</p>
-<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-csharp" data-lang="csharp"><span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">override</span> <span style="color:#66d9ef">void</span> OnModelCreating(ModelBuilder modelBuilder)
-{
-    <span style="color:#66d9ef">var</span> navigation = modelBuilder.Entity&lt;Car&gt;()
-        .Metadata.FindNavigation(nameof(Car.Owner));
-
-    navigation.SetPropertyAccessMode(PropertyAccessMode.Field);
-}
-</code></pre></div><p>With this configuration, EFs object creation does not touch the setter anymore and the owner count is incremented only in our code. It uses the provided backing field <code>_owner</code> instead of the <code>Owner</code> property.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-csharp" data-lang="csharp"><span style="display:flex;"><span><span style="color:#66d9ef">protected</span> <span style="color:#66d9ef">override</span> <span style="color:#66d9ef">void</span> OnModelCreating(ModelBuilder modelBuilder)
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">var</span> navigation = modelBuilder.Entity&lt;Car&gt;()
+</span></span><span style="display:flex;"><span>        .Metadata.FindNavigation(nameof(Car.Owner));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    navigation.SetPropertyAccessMode(PropertyAccessMode.Field);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>With this configuration, EFs object creation does not touch the setter anymore and the owner count is incremented only in our code. It uses the provided backing field <code>_owner</code> instead of the <code>Owner</code> property.</p>
 <h2 id="summary">Summary</h2>
 <p>Although I only tested this behavior on EF core, my <em>guess</em> is that the problem with setters applies to other ORMs as well, one way or another. Personally I prefer the first fix, where the logic is encapsulated to a method. It is more clear for the API consumer, does not require any additional configuration for the entities and the team does not have to worry about the weird cases where the problem surfaces.</p>
 <p>If you need to take the second route with the additional configuration, double check that you have integration tests that include EF in the mix. You can find one <a href="https://github.com/kimisc/SetterDemo/blob/ebc0c015131962bbff17ce92f13a5f72713d1736/SetterDemoTests/CarTests.cs#L19">example here</a>. Obviously its always good to have the integration tests, even when going with the recommended solution.</p>
